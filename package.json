@@ -1,0 +1,27 @@
+{
+  "name": "person-name-match",
+  "version": "0.1.0",
+  "description": "Fuzzy matching full name provided by user against names extracted using OCR from an ID",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alejamp/person-name-match.git"
+  },
+  "author": "Alejandro Pirola",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alejamp/person-name-match/issues"
+  },
+  "homepage": "https://github.com/alejamp/person-name-match#readme",
+  "devDependencies": {
+    "ts-node": "^10.9.1"
+  },
+  "dependencies": {
+    "fast-fuzzy": "^1.12.0"
+  }
+}
