@@ -4,7 +4,7 @@
 /* eslint-disable no-console */
 /* eslint-disable prettier/prettier */
 
-import { search, fuzzy } from "fast-fuzzy";
+import { search, fuzzy, MatchData } from "fast-fuzzy";
 
 
 export interface IPersonName {
@@ -14,15 +14,28 @@ export interface IPersonName {
   secondLastName?: string;
 }
 
+export interface IPersonNameMatchOptions {
+  normalizeWhiteSpace?: boolean;
+  removeSpecialCharacters?: boolean;
+  ignoreCase?: boolean;
+  lastNameMinTreshold?: number;
+}
 
-export function namesFuzzyMatch(name: IPersonName, targetFullName: string, options?: {
-  normalizeWhiteSpace: boolean,
-}): any {
+export interface IPersonNameMatchResult {
+  success?: boolean;
+  averageScore?: number;
+  reason?: string;
+  matches?: any;
+}
+
+
+export function namesFuzzyMatch(name: IPersonName, targetFullName: string, options?: IPersonNameMatchOptions): IPersonNameMatchResult {
 
     let opts = {
         normalizeWhiteSpace: true,
         removeSpecialCharacters: true,
         ignoreCase: true,
+        lastNameMinTreshold: 0.9,
         ...options ?? {},
     };
 
@@ -51,18 +64,31 @@ export function namesFuzzyMatch(name: IPersonName, targetFullName: string, optio
     // for each key in name. Get best match for each from targetFullNameArray
     // using fuzzy search
 
-    let matches: any[] = [];
+    let matches: any[]= [];
+    let result: IPersonNameMatchResult= {};
     for (const key in name) {
       if (Object.prototype.hasOwnProperty.call(name, key)) {
         const e = (name as any)[key];
         if (e) {
-          let match = search(e, targetFullNameArray, { returnMatchData: true, ignoreCase: opts.ignoreCase });
-          if (match) {
-            matches.push({
-              key: key,
-              match: match[0],
-            });
+          const match = search(e, targetFullNameArray, { returnMatchData: true, ignoreCase: opts.ignoreCase });
+          const bestMatch = match?.[0];
+
+          matches.push({
+            key: key,
+            match: bestMatch
+          });
+
+          if (key === "lastName" && opts.lastNameMinTreshold) {
+            if ((bestMatch?.score ?? 0) < opts.lastNameMinTreshold) {
+              result = {
+                success: false,
+                averageScore: 0,
+                reason: `Best last name match has score less than lastNameMinTreshold=${opts.lastNameMinTreshold}`,
+                matches: matches
+              };
+            }
           }
+
         }
       }
     }
@@ -75,45 +101,14 @@ export function namesFuzzyMatch(name: IPersonName, targetFullName: string, optio
     let averageScore = totalScore / matches.length;
 
 
-    return {
-      sourceName: name,
-      targetFullName: targetFullName,
+    result = {
+      success: result.success ?? true,
+      averageScore: averageScore,
       matches: matches,
-      averageScore: averageScore
+      reason: result.reason ?? `Average score is ${averageScore}` 
     };
 
+    return result;
 }
 
 
-// TEST MISSPELLING FULL NAMES
-//---------------------------------------
-
-
-// let name = {
-//   firstName: "John",
-//   middleName: "F",
-//   lastName: "Smith",
-//   // secondLastName: "Smith"
-// };
-
-// /// Misspelled full names, change order, add extra words, remove words, etc
-// let targetMisspelledFullNamesArray = [
-//   "Dow Jonn Franciss",
-//   // "John Do",
-//   // "Dow John",
-//   // "Don Juan",
-//   // "Doe John",
-//   // "John Doe 2"
-// ];
-
-   
-// // call the nameMatch function for each misspelled full name as a target.
-// // use the original full name as the first argument
-
-// for (let i = 0; i < targetMisspelledFullNamesArray.length; i++) {
-//   let targetFullName = targetMisspelledFullNamesArray[i];
-//   let res = namesFuzzyMatch(name, targetFullName);
-//   console.log(res);
-// }
-
-// console.log("done");
