@@ -1,6 +1,6 @@
 {
   "name": "person-name-match",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Fuzzy matching full name provided by user against names extracted using OCR from an ID",
   "main": "dist/index.js",
   "scripts": {
