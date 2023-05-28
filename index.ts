@@ -35,7 +35,7 @@ export function namesFuzzyMatch(name: IPersonName, targetFullName: string, optio
         normalizeWhiteSpace: true,
         removeSpecialCharacters: true,
         ignoreCase: true,
-        lastNameMinTreshold: 0.9,
+        lastNameMinTreshold: undefined,
         ...options ?? {},
     };
 
